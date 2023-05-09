@@ -11,7 +11,17 @@ legalSE/ django后端
 README.md 说明文档
 ~~~
 
-git 用法
+### Vue 项目初始化
+
+1、下载，安装node.js https://nodejs.org/en/download/
+
+2、在终端中检查 `node -v` 以及`npm -v`
+
+3、在前端根目录`legalSE_frontend`根据其README执行install和run dev
+
+
+### git 用法
+
 ~~~
 每次需要pull
 
