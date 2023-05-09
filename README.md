@@ -10,3 +10,12 @@
 legalSE/ django后端
 README.md 说明文档
 ~~~
+
+git 用法
+~~~
+每次需要pull
+
+git add .
+git commit -m "msg"
+git push
+~~~
