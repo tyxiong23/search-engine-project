@@ -35,7 +35,7 @@ const highlightedText = (content: string, keywords: string[]) => {
 }
 
 const router = useRouter()
-const emit = defineEmits(['childToParent', 'parentToChild'])
+const emit = defineEmits(['itemToSearch'])
 const goToDetail = (case_id: number) => {
   router.push({
     path: "/detail",
@@ -43,11 +43,11 @@ const goToDetail = (case_id: number) => {
       id: case_id
     }
   })
-  emit("parentToChild", case_id)
+  // emit("parentToChild", case_id)
 }
 
-const clickLabel = (str: string) => {
-  emit('childToParent', str)
+const clickLabel = (str: string, cls: number) => {
+  emit('itemToSearch', str, cls)
 }
 
 
@@ -97,7 +97,7 @@ const clickLabel = (str: string) => {
         type='success'
         effect="dark" round
         style="margin:5px"
-        @click="clickLabel(result.year.toString())">
+        @click="clickLabel(result.year.toString(), 1)">
         {{ result.year }}
       </el-tag>
       <el-tag
@@ -105,7 +105,7 @@ const clickLabel = (str: string) => {
         :type="''"
         effect="dark" round
         style="margin:5px"
-        @click="clickLabel(result.case_reason)">
+        @click="clickLabel(result.case_reason, 4)">
         {{ result.case_reason }}
       </el-tag>
       <el-tag
@@ -113,7 +113,7 @@ const clickLabel = (str: string) => {
         :type="'warning'"
         effect="dark" round
         style="margin:5px"
-        @click="clickLabel(result.judge_prop)">
+        @click="clickLabel(result.judge_prop, 3)">
         {{ result.judge_prop }}
       </el-tag>
       <el-tag
@@ -121,7 +121,7 @@ const clickLabel = (str: string) => {
         :type="'danger'"
         effect="dark" round
         style="margin:5px"
-        @click="clickLabel(result.note_name)">
+        @click="clickLabel(result.note_name, 2)">
         {{ result.note_name }}
       </el-tag>
     </div>

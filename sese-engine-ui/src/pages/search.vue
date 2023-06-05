@@ -18,10 +18,21 @@ const router = useRouter()
 
 const searchStore = useSearchStore()
 const query = computed(() => route.query.q?.toString() || '')
-
 const law_id = computed(() => route.query.lid?.toString() || '')
+const case_reason = computed(() => route.query.case_reason?.toString() || '')
+const province = computed(() => route.query.province?.toString() || '')
+const note_name = computed(() => route.query.note_name?.toString() || '')
+const judge_prop = computed(() => route.query.judge_prop?.toString() || '')
+const year = computed(() => route.query.year?.toString() || '')
 
 const keyword = ref(query.value)
+const ref_law_id = ref(law_id.value)
+const ref_case_reason = ref(case_reason.value)
+const ref_province = ref(province.value)
+const ref_note_name = ref(note_name.value)
+const ref_judge_prop = ref(judge_prop.value)
+const ref_year = ref(year.value)
+
 watch(() => query.value, () => {
   searchStore.setNewKeyword(query.value)
   keyword.value = query.value
@@ -42,7 +53,12 @@ const searchByParams = async () => {
   const data = await search({
     q: keyword.value,
     page: String(curPage.value),
-    lid: law_id.value,
+    lid: ref_law_id.value,
+    case_reason: ref_case_reason.value,
+    judge_prop: ref_judge_prop.value,
+    province: ref_province.value,
+    note_name: ref_note_name.value,
+    year: ref_year.value
   })
   searchStore.isLoading = false
   searchData.value = data
@@ -53,12 +69,19 @@ onBeforeMount(async () => {
   searchByParams()
 })
 
-onBeforeRouteLeave(
+onBeforeRouteUpdate(
   async () => {
-    console.log("onBeforeMountLeave")
-    searchStore.isLoading = true
-  }
+  console.log("onBeforeRouteUpdate")
+  searchByParams()
+}
 )
+
+// onBeforeRouteLeave(
+//   async () => {
+//     console.log("onBeforeMountLeave")
+//     searchStore.isLoading = true
+//   }
+// )
 
 const curPage = ref(1)
 
@@ -71,14 +94,33 @@ const goToPage = (page: number) => {
     query: {
       q: keyword.value,
       page: curPage.value,
+      lid: ref_law_id.value,
+      case_reason: ref_case_reason.value,
+      judge_prop: ref_judge_prop.value,
+      province: ref_province.value,
+      note_name: ref_note_name.value,
+      year: ref_year.value
     },
   })
   searchByParams()
 }
 
-watch(() => searchStore.savedKeyword, () => {
-  searchByParams()
-})
+// watch(() => searchStore.savedKeyword, () => {
+//   searchByParams()
+// })
+
+// watch(() => case_reason, ()=> {
+//   searchByParams()
+// })
+
+// watch(() => note_name, ()=> {
+//   searchByParams()
+// })
+
+// onUpdated(async () => {
+//   console.log("onUpdated")
+//   searchByParams()
+// })
 
 /**
  * 显示的页数
@@ -93,6 +135,11 @@ const displayedPages = computed(() => {
 
 const searchKeyword = () => {
   // reset
+  ref_case_reason.value = ""
+  ref_note_name.value = ""
+  ref_year.value = ''
+  ref_judge_prop.value = ""
+  ref_law_id.value = ''
   curPage.value = 1
   // slice.value = `0:${pageNumber.value}`
   enter(keyword.value)
@@ -116,8 +163,35 @@ const onSubmit = () => {
   console.log('submit!')
 }
 
-const pushLabel = (msg: string) => {
-  keyword.value = msg
+const searchLabel = (msg: string, cls: number) => {
+  keyword.value = ""
+  ref_case_reason.value = ""
+  ref_note_name.value = ""
+  ref_year.value = ''
+  ref_judge_prop.value = ""
+  ref_law_id.value = ''
+  if (cls == 1) {
+    ref_year.value = msg
+  } else if (cls == 2) {
+    ref_note_name.value = msg
+  } else if (cls == 3) {
+    ref_judge_prop.value = msg
+  } else if (cls == 4) {
+    ref_case_reason.value = msg
+  }
+  router.push({
+    path: '/search',
+    query: {
+      q: keyword.value,
+      page: curPage.value,
+      lid: ref_law_id.value,
+      case_reason: ref_case_reason.value,
+      judge_prop: ref_judge_prop.value,
+      province: ref_province.value,
+      note_name: ref_note_name.value,
+      year: ref_year.value
+    },
+  })
   searchByParams()
 }
 
@@ -152,7 +226,7 @@ const pushLabel = (msg: string) => {
             找到 {{ searchData['total_objects'] }} 个结果，共花费{{ searchData.time }} 秒。
           </div>
           <template v-if="searchData['total_objects']">
-            <ResultItem v-for="(item, i) in searchData['results']" :key="i" :keywords="keywords" se :result="item" @child-to-parent="pushLabel"/>
+            <ResultItem v-for="(item, i) in searchData['results']" :key="i" :keywords="keywords" se :result="item" @item-to-search="searchLabel"/>
           </template>
 
           <div v-else text="left" m="t-8">
