@@ -34,12 +34,12 @@ import time
 # In case/views.py
 
 from django.http import JsonResponse
-from .search_index import search_cases
+from .search_index import search_cases, search_cases_new
 from haystack.query import SearchQuerySet
 
 import random
 
-
+from .search_index import MAX_NUM
 
 def get_related_cases_summary(case: Case, num_return = 10):
     t1 = time.time()
@@ -159,6 +159,8 @@ def related_cases_from_law(request: HttpRequest):
         law_id = int(law_id)
         law: Law = Law.objects.get(id = law_id)
         results = law.cases.all()
+        # random.shuffle(results)
+        results = results[:MAX_NUM]
         split_words = [law.name]
         total_results = len(results)
         # print("total_num", total_results)
@@ -215,9 +217,10 @@ def search_view(request: HttpRequest):
     
     query_str = cd['q']  # The 'q' parameter in the URL contains the query string
     print("query_str1", query_str)
-
     # MAX_NUM = 500
-    results, split_words = search_cases(query_str) # [:MAX_NUM]
+    # results, split_words = search_cases(query_str) # [:MAX_NUM]
+    results, split_words = search_cases_new(cd)
+
     total_results = len(results)
     print("total_num", total_results)
     paginator = Paginator(results, per_page=10)
