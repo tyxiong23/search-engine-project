@@ -19,6 +19,8 @@ const router = useRouter()
 const searchStore = useSearchStore()
 const query = computed(() => route.query.q?.toString() || '')
 
+const law_id = computed(() => route.query.lid?.toString() || '')
+
 const keyword = ref(query.value)
 watch(() => query.value, () => {
   searchStore.setNewKeyword(query.value)
@@ -39,7 +41,8 @@ const searchByParams = async () => {
   searchStore.isLoading = true
   const data = await search({
     q: keyword.value,
-    page: String(curPage.value)
+    page: String(curPage.value),
+    lid: law_id.value,
   })
   searchStore.isLoading = false
   searchData.value = data
@@ -99,11 +102,11 @@ const searchKeyword = () => {
 // 高亮文本
 // do not use same name with ref
 const form = reactive({
-  name: '',
-  region: '',
-  date1: '',
-  date2: '',
-  delivery: false,
+  year: null,
+  judge_prop: '',
+  court: '',
+  note_name: '',
+  case_reason: false,
   type: [],
   resource: '',
   desc: '',
@@ -111,6 +114,11 @@ const form = reactive({
 
 const onSubmit = () => {
   console.log('submit!')
+}
+
+const pushLabel = (msg: string) => {
+  keyword.value = msg
+  searchByParams()
 }
 
 </script>
@@ -144,7 +152,7 @@ const onSubmit = () => {
             找到 {{ searchData['total_objects'] }} 个结果，共花费{{ searchData.time }} 秒。
           </div>
           <template v-if="searchData['total_objects']">
-            <ResultItem v-for="(item, i) in searchData['results']" :key="i" :keywords="keywords" se :result="item" />
+            <ResultItem v-for="(item, i) in searchData['results']" :key="i" :keywords="keywords" se :result="item" @child-to-parent="pushLabel"/>
           </template>
 
           <div v-else text="left" m="t-8">
@@ -196,7 +204,7 @@ const onSubmit = () => {
               高级检索
             </el-header>
             <el-form :model="form" label-width="120px">
-              <el-form-item label="Activity name">
+              <el-form-item label="年份">
                 <el-input v-model="form.name" />
               </el-form-item>
               <el-form-item label="Activity name">

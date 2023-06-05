@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('case/', include('case.urls')),  # Include URLs from the case app
     path('search/', views.search_view, name="search"),
-    path("detail/", views.case_detail_view, name="case")
+    path("detail/", views.case_detail_view, name="case"),
+    path("law2cases/", views.related_cases_from_law, name="law2cases")
 ]

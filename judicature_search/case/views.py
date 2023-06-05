@@ -9,6 +9,8 @@ from django.http.request import HttpRequest
 from case.models import Case, Law
 from django.core.paginator import Paginator
 
+from haystack.forms import SearchForm
+
 import time
 
 
@@ -148,22 +150,76 @@ def get_obj_summary(obj, query_str = None):
     return result_obj
 
 
+
+def related_cases_from_law(request: HttpRequest):
+    t1 = time.time()
+    law_id = request.GET.get('lid', '-1')
+    
+    try:
+        law_id = int(law_id)
+        law: Law = Law.objects.get(id = law_id)
+        results = law.cases.all()
+        split_words = [law.name]
+        total_results = len(results)
+        # print("total_num", total_results)
+        paginator = Paginator(results, per_page=10)
+        page = request.GET.get("page", default='1')
+        page_obj_list = paginator.get_page(page).object_list
+
+        result_list = []
+        for obj in page_obj_list:
+            # print("type", type(obj), obj.keys())
+            result_obj = get_obj_summary(obj, law.name)
+            result_list.append(result_obj)
+
+        time_delta = time.time() - t1
+        response_data = {
+                "law_id": law.id,
+                "law_name": law.name,
+                "total_objects": total_results,
+                "time": time_delta,
+                "results": result_list,
+                "code": 0,
+                "split_words": split_words
+            }
+        jsonResponse = JsonResponse(response_data)  # Return the results as a JSON response
+        # jsonResponse["Access-Control-Allow-Origin"] = "http:/127.0.0.1:3333"
+        return jsonResponse
+
+    except:
+        return JsonResponse({
+            "code": -1,
+            "msg": f"law {law_id} doesn't exist!!"
+        })
+    
+
+
 def search_view(request: HttpRequest):
     t1 = time.time()
+
+    form = SearchForm(request.GET)
+    try:
+        cd = form.data
+        
+    except:
+        response_data = {
+            "code": -1,
+            "data": {
+                "msg": "view.search_view error!!"
+            }
+        }
+
+    if 'lid' in cd and cd['lid'].isnumeric():
+        print("lid", cd['lid'])
+        return related_cases_from_law(request)
     
-    query_str = request.GET.get('q', '')  # The 'q' parameter in the URL contains the query string
+    query_str = cd['q']  # The 'q' parameter in the URL contains the query string
     print("query_str1", query_str)
 
     # MAX_NUM = 500
     results, split_words = search_cases(query_str) # [:MAX_NUM]
     total_results = len(results)
     print("total_num", total_results)
-    
-    
-    time_delta = time.time() - t1
-      # Call the search function
-    # print("results", results[0]["text"])
-
     paginator = Paginator(results, per_page=10)
     page = request.GET.get("page", default='1')
     page_obj_list = paginator.get_page(page).object_list
@@ -174,6 +230,7 @@ def search_view(request: HttpRequest):
         result_obj = get_obj_summary(obj, query_str)
         result_list.append(result_obj)
 
+    time_delta = time.time() - t1
     response_data = {
         "total_objects": total_results,
         "time": time_delta,

@@ -56,6 +56,10 @@ onBeforeMount(async () => {
   getDetail()
 })
 
+const searchFromLaw = (law_id: string) => {
+  router.push(`/search?lid=${law_id}`)
+}
+
 // onBeforeRouteUpdate(async () => {
   
   
@@ -122,7 +126,7 @@ const { t } = useI18n()
             <el-tag
               :type="''"
               effect="dark" round
-              style="margin:5px">
+              style="margin:5px" @click="searchFromLaw(item_law.id.toString())">
               {{ item_law.name }}
             </el-tag>
           </template>
@@ -130,7 +134,7 @@ const { t } = useI18n()
       <div style="margin-top: 25px;">
           <p style="margin: 8px; font-size: large;">案例推荐</p>
           <template v-if="detailData">
-            <ResultItem v-for="(item, i) in detailData.related_cases" :key="i" :keywords="[]" se :result="item" />
+            <ResultItem v-for="(item, i) in detailData.related_cases" :key="i" :keywords="[]" se :result="item"/>
           </template>
         </div>
       </div>

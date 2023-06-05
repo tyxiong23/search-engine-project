@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { routerKey } from 'vue-router';
+// import { routerKey } from 'vue-router';
 import type { SearchResult } from '~/api/types'
 import { useRouter } from 'vue-router';
 import { emit } from 'process';
@@ -10,14 +10,14 @@ const props = defineProps<{
   result: SearchResult
 }>()
 
-const route = useRoute()
-const query = computed(() => {
-  const q = route.query.q?.toString()
-  if (q?.startsWith('site:'))
-    return q.split(' ').slice(1).join(' ')
-  else
-    return q
-})
+// const route = useRoute()
+// const query = computed(() => {
+//   const q = route.query.q?.toString()
+//   if (q?.startsWith('site:'))
+//     return q.split(' ').slice(1).join(' ')
+//   else
+//     return q
+// })
 
 /**
  * 高亮文本
@@ -44,6 +44,10 @@ const goToDetail = (case_id: number) => {
     }
   })
   emit("parentToChild", case_id)
+}
+
+const clickLabel = (str: string) => {
+  emit('childToParent', str)
 }
 
 
@@ -92,28 +96,32 @@ const goToDetail = (case_id: number) => {
         :key='result.year'
         type='success'
         effect="dark" round
-        style="margin:5px">
+        style="margin:5px"
+        @click="clickLabel(result.year.toString())">
         {{ result.year }}
       </el-tag>
       <el-tag
         :key='result.case_reason'
         :type="''"
         effect="dark" round
-        style="margin:5px">
+        style="margin:5px"
+        @click="clickLabel(result.case_reason)">
         {{ result.case_reason }}
       </el-tag>
       <el-tag
         :key='result.judge_prop'
         :type="'warning'"
         effect="dark" round
-        style="margin:5px">
+        style="margin:5px"
+        @click="clickLabel(result.judge_prop)">
         {{ result.judge_prop }}
       </el-tag>
       <el-tag
         :key='result.note_name'
         :type="'danger'"
         effect="dark" round
-        style="margin:5px">
+        style="margin:5px"
+        @click="clickLabel(result.note_name)">
         {{ result.note_name }}
       </el-tag>
     </div>
