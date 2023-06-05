@@ -20,5 +20,6 @@ from case import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('case/', include('case.urls')),  # Include URLs from the case app
-    path('search/', views.search_view, name="search")
+    path('search/', views.search_view, name="search"),
+    path("detail/", views.case_detail_view, name="case")
 ]

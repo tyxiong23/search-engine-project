@@ -1,5 +1,9 @@
 <script lang="ts" setup>
+import { routerKey } from 'vue-router';
 import type { SearchResult } from '~/api/types'
+import { useRouter } from 'vue-router';
+import { emit } from 'process';
+
 
 const props = defineProps<{
   keywords: string[]
@@ -30,38 +34,51 @@ const highlightedText = (content: string, keywords: string[]) => {
   return result
 }
 
-const domain = computed(() => {
-  const url = new URL(props.result['网址'])
-  return url.hostname
-})
+const router = useRouter()
+const emit = defineEmits(['childToParent', 'parentToChild'])
+const goToDetail = (case_id: number) => {
+  router.push({
+    path: "/detail",
+    query: {
+      id: case_id
+    }
+  })
+  emit("parentToChild", case_id)
+}
 
-const siteString = computed(() => `site:${domain.value}`)
-const domainUrl = computed(() =>
-  `/search?q=${siteString.value} ${query.value?.trim()}`,
-)
+
+
+
+
+
 </script>
 
 <template>
   <div class="result-item relative overflow-visible" flex="~ col" text="left" m="b-4">
-    <span class="flex justify-between items-center">
-      <a :href="result['网址']" target="_blank" class="truncate">
-        <cite class="not-italic" text="xs">{{ result['网址'] }}</cite>
-      </a>
-      <a :href="domainUrl" class="cursor-pointer related-info sese-link transition truncate">
-        <cite text="xs">在 {{ domain }}  中找到 {{ result['相同域名个数'] }} 个相关页面</cite>
-      </a>
-    </span>
-    <template v-if="result['信息']">
+    <!-- <span class="flex justify-between items-center">
+    </span> -->
+    <template v-if="result['title']">
+      <!-- <h3 class="top-0 truncate" @click="push(result.id)" v-html="highlightedText(result.title, keywords)" color="#0000C6"/> -->
+      <h3 class="top-0 truncate hover:underline"  v-html="highlightedText(result.title, keywords)" @click="goToDetail(result.id)" color="#0000C6"/>
+      <p text="sm" v-html="highlightedText(result.content, keywords)"/>
+    </template>
+    
+    
+    <!-- <template v-if="result['信息']">
       <a
         :href="result['网址']" target="_blank"
         class="text-lg text-blue-900 hover:underline dark:text-blue-500"
       >
+      <p
+        text="sm"
+        v-html="highlightedText(addString(result.fullText.substring(result.title.length, result.title.length + 97)), keywords)"
+      />
         <h3 class="top-0 truncate">
           {{ result['信息']['标题'] }}
         </h3>
-      </a>
-      <p text="sm" v-html="highlightedText(result['信息']['描述'] || result['信息']['文本'], keywords)" />
-    </template>
+      </a> -->
+      <!-- <p text="sm" v-html="highlightedText(result['content'], keywords)" />
+    </template> -->
     <div v-else>
       <div class="inline-flex justify-start items-center border" p="1" m="1">
         <div i-ri-alert-line />
@@ -69,7 +86,49 @@ const domainUrl = computed(() =>
       </div>
     </div>
 
-    <Transition>
+    <div class="tag-group">
+      
+      <el-tag
+        :key='result.year'
+        type='success'
+        effect="dark" round
+        style="margin:5px">
+        {{ result.year }}
+      </el-tag>
+      <el-tag
+        :key='result.case_reason'
+        :type="''"
+        effect="dark" round
+        style="margin:5px">
+        {{ result.case_reason }}
+      </el-tag>
+      <el-tag
+        :key='result.judge_prop'
+        :type="'warning'"
+        effect="dark" round
+        style="margin:5px">
+        {{ result.judge_prop }}
+      </el-tag>
+      <el-tag
+        :key='result.note_name'
+        :type="'danger'"
+        effect="dark" round
+        style="margin:5px">
+        {{ result.note_name }}
+      </el-tag>
+    </div>
+    <!-- <div class="tag-group">
+      <span class="tag-group__title">Plain</span>
+      <el-tag
+        v-for="item in items"
+        :key="item.label"
+        :type="item.type"
+        effect="plain">
+        {{ item.label }}
+      </el-tag> -->
+    <!-- </div> -->
+
+    <!-- <Transition>
       <div
         class="reason-container absolute top-0 left-180 min-h-full justify-center hidden transition"
         w="64"
@@ -82,7 +141,7 @@ const domainUrl = computed(() =>
           </span>
         </blockquote>
       </div>
-    </Transition>
+    </Transition> -->
   </div>
 </template>
 

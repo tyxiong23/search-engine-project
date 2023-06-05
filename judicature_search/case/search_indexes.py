@@ -6,8 +6,11 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
 
     # 模型字段，打包数据
+    id = indexes.IntegerField(model_attr="id")
+    qw_value = indexes.CharField(model_attr="qw_value")
+    head = indexes.CharField(model_attr="head")
     note_name = indexes.CharField(model_attr="note_name")
-    judge_prop = indexes.CharField(model_attr="note_name")
+    judge_prop = indexes.CharField(model_attr="judge_prop")
     court = indexes.CharField(model_attr="court")
     case_reason = indexes.CharField(model_attr="case_reason")
     province = indexes.CharField(model_attr="province")

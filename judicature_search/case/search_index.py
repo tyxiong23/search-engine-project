@@ -4,6 +4,7 @@ from whoosh import fields, index
 from whoosh.qparser import QueryParser
 from case.models import Case
 from whoosh.index import open_dir
+import whoosh.query.terms
 
 
 def search_cases(query_str):
@@ -12,20 +13,29 @@ def search_cases(query_str):
 
     parser = QueryParser("text", index.schema)
     query = parser.parse(query_str)
-    print("query")
-    print(query)
+
+    print("query", query, type(query))
+    if isinstance(query, whoosh.query.terms.Term):
+        split_words = [query.text]
+    else:
+        try:
+            split_words = [i.text for i in query]
+        except:
+            split_words = []
+
+    print("split queries", split_words)
 
     results_list = []
     with index.searcher() as searcher:
-        results = searcher.search(query)
-        print("results")
-        print(results)
+        results = searcher.search(query, limit=None)
+        print("results", results)
         for hit in results:
+            # print('hit_id', hit["id"], type(hit['id']))
             # hit['text'] = hit['text'].encode("utf-8").decode("unicode-escape")
             results_list.append(dict(hit))  # Convert the hit object to a dictionary and add it to the list
             # print("dict", hit.keys())
 
-    return results_list
+    return results_list, split_words
 # def create_index():
 #     # Define the schema for the index
 #     schema = fields.Schema(qw_value=fields.TEXT(stored=True))

@@ -2,7 +2,7 @@ import { apiFetch } from './fetch'
 
 interface SearchParams {
   q: string
-  slice: string
+  page: string
 }
 
 export async function search(params: Partial<SearchParams>) {
@@ -11,10 +11,10 @@ export async function search(params: Partial<SearchParams>) {
 
   const searchParams: {
     q: string
-    slice?: string
+    page ?: string
   } = {
     q: params.q || '',
-    slice: params.slice || '0:10',
+    page: params.page || '1',
   }
   const data = await apiFetch('/search', {
     params: searchParams,

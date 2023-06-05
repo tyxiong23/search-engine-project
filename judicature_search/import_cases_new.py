@@ -35,8 +35,12 @@ def law_match(in_str):
 
 
 def import_cases_from_xml(file_path) -> bool:
-    tree = ET.parse(file_path)
-    root = tree.getroot()
+    try:
+        tree = ET.parse(file_path)
+        root = tree.getroot()
+    except:
+        print(f"[parser] {file_path} parser error!!")
+        return False
 
     try:
         qw_value = root.find('QW').get('value'); assert is_valid(qw_value)
@@ -54,30 +58,21 @@ def import_cases_from_xml(file_path) -> bool:
         print(f"[related people] {file_path} no 当事人!!")
         return False
     
-    judicial_record = root.find('.//SSJL').get('value')
+    
     try:
+        judicial_record = root.find('.//SSJL').get('value')
         basic_info = root.find('.//AJJBQK').get('value')
-    except:
-        basic_info = ""
-    try:
         judgement_process = root.find('.//CPFXGC').get('value')
-    except:
-        judgement_process = ""
-
-    try:
         result = root.find('.//PJJG').get('value')
-    except:
-        print(f"[Result] {file_path} no 判决结果！！")
-
-    try:
         tail = root.find('.//WW').get('value')
     except:
-        tail = ''
+        return False
 
     try:
         note_name= root.find('.//WSMC').get('value')
     except:
         print("[note_name] {file_path} no 文书名称!!")
+        return False
 
     try:
         judge_prop = root.find('.//SPCX').get('value')
@@ -118,9 +113,8 @@ def import_cases_from_xml(file_path) -> bool:
     for idx, field in enumerate([
         qw_value, head, 
         # related_people, judicial_record, basic_info, judgement_process, result, tail,
-        note_name, 
         # judge_prop,
-        court, province, case_reason
+        court, province
     ]):  
         if not is_valid(field):
             print(f"[inValid field] {file_path, idx, field}")
@@ -151,27 +145,29 @@ def import_cases_from_xml(file_path) -> bool:
             year = year,
         )
 
-        # print("create case")
-
-
         for matched_law in law_matches:
             law, if_create = Law.objects.get_or_create(name = matched_law)
             case.laws.add(law)
-        
         # case.save()
 
     except:
         return False
     
+    
     return True
 
 if __name__ == "__main__":
+    print("laws: ", Law.objects.all().__len__(), "cases: ", Case.objects.all().__len__())
+
     Case.objects.all().delete()
     Law.objects.all().delete()
 
+    print("laws: ", Law.objects.all().__len__(), "cases: ", Case.objects.all().__len__())
+
+    # exit(0)
     # data_dir = os.path.join(os.path.dirname(__file__), "case/data")
     data_dir = "../../Legal_data"
-    xml_files = glob(data_dir + "/*.xml")[:100]
+    xml_files = glob(data_dir + "/*.xml")
     count = 0; bar = tqdm(xml_files)
     for i, xml_f in enumerate(bar):
         bar.set_description(f"{os.path.basename(xml_f)} {count}/{i+1} cases imported")
