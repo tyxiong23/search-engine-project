@@ -285,10 +285,11 @@ def search_upload_xml():
     if note_name:
         search_dict['note_name'] = note_name
 
-    if len(search_dict) <= 2:
+    print("upload_search_dict", search_dict)
+    if len(search_dict) < 2:
         try: 
             text=root.find(".//QW").get("value")[:300]
-            query = get_keywords_from_text(text, max_num=4)
+            query = get_keywords_from_text(text, max_num=3)
             search_dict['q'] = query
         except:
             pass
