@@ -170,6 +170,8 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+UPLOAD_PATH = './static/upload.txt'
 # CORS_EXPOSE_HEADERS = ['Set-Cookie']
 # CORS_ORIGIN_WHITELIST = (
 #     'http://localhost:3333',  # for localhost (REACT Default)

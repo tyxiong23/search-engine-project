@@ -2,7 +2,7 @@
 // import { routerKey } from 'vue-router';
 import type { SearchResult } from '~/api/types'
 import { useRouter } from 'vue-router';
-import { emit } from 'process';
+// import { emit } from 'process';
 
 
 const props = defineProps<{
@@ -58,13 +58,13 @@ const clickLabel = (str: string, cls: number) => {
 </script>
 
 <template>
-  <div class="result-item relative overflow-visible" flex="~ col" text="left" m="b-4">
+  <div class="result-item relative overflow-visible" flex="~ col" text="left" m="b-4" >
     <!-- <span class="flex justify-between items-center">
     </span> -->
-    <template v-if="result['title']">
+    <template v-if="result['title']" >
       <!-- <h3 class="top-0 truncate" @click="push(result.id)" v-html="highlightedText(result.title, keywords)" color="#0000C6"/> -->
       <h3 class="top-0 truncate hover:underline"  v-html="highlightedText(result.title, keywords)" @click="goToDetail(result.id)" color="#0000C6"/>
-      <p text="sm" v-html="highlightedText(result.content, keywords)"/>
+      <p style="width: 100%;" text="sm" v-html="highlightedText(result.content, keywords)"/>
     </template>
     
     
@@ -93,6 +93,7 @@ const clickLabel = (str: string, cls: number) => {
     <div class="tag-group">
       
       <el-tag
+        class="icon"
         :key='result.year'
         type='success'
         effect="dark" round
@@ -101,6 +102,7 @@ const clickLabel = (str: string, cls: number) => {
         {{ result.year }}
       </el-tag>
       <el-tag
+        class="icon"
         :key='result.case_reason'
         :type="''"
         effect="dark" round
@@ -109,6 +111,7 @@ const clickLabel = (str: string, cls: number) => {
         {{ result.case_reason }}
       </el-tag>
       <el-tag
+        class="icon"
         :key='result.judge_prop'
         :type="'warning'"
         effect="dark" round
@@ -117,6 +120,7 @@ const clickLabel = (str: string, cls: number) => {
         {{ result.judge_prop }}
       </el-tag>
       <el-tag
+        class="icon"
         :key='result.note_name'
         :type="'danger'"
         effect="dark" round
@@ -166,6 +170,12 @@ const clickLabel = (str: string, cls: number) => {
     .reason-container {
       opacity: 1;
     }
+  }
+}
+
+.icon {
+  &:hover {
+    filter: brightness(1.1);
   }
 }
 

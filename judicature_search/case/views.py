@@ -10,9 +10,10 @@ from case.models import Case, Law
 from django.core.paginator import Paginator
 
 from haystack.forms import SearchForm
+import xml.etree.ElementTree as ET
 
 import time
-
+import re
 
 # class CaseViewSet(viewsets.ModelViewSet):
 #     queryset = Case.objects.all()
@@ -33,7 +34,7 @@ import time
 
 # In case/views.py
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .search_index import search_cases, search_cases_new
 from haystack.query import SearchQuerySet
 
@@ -41,7 +42,26 @@ import random
 
 from .search_index import MAX_NUM
 
-def get_related_cases_summary(case: Case, num_return = 10):
+from django.conf import settings
+import os
+
+
+def upload_case_xml(request: HttpRequest):
+    print(request)
+    dir_name = os.path.dirname(settings.UPLOAD_PATH)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    if request.method == 'POST':
+        xml_file = request.FILES['file'].read().decode('utf-8')
+        print("finish upload", type(xml_file))
+        with open(settings.UPLOAD_PATH, "w", encoding="utf-8") as save_f:
+            save_f.write(xml_file)
+            
+        return JsonResponse({"status": "success"})
+    else:
+        return JsonResponse({"status": "error"})
+
+def get_related_cases_summary(case: Case, num_return = 5):
     t1 = time.time()
     related_objs1 = list(Case.objects.all().filter(case_reason = case.case_reason).exclude(id=case.id))
     t2 = time.time()
@@ -193,8 +213,92 @@ def related_cases_from_law(request: HttpRequest):
             "code": -1,
             "msg": f"law {law_id} doesn't exist!!"
         })
-    
 
+def get_keywords_from_text(content: str, max_num = 4):
+    result_list = []
+    COMMON_WORDS = [
+        ["交通肇事","故意伤害","强奸","非法拘禁","抢劫","盗窃","诈骗","抢夺","职务侵占","敲诈勒索","妨害公务","聚众斗殴","寻衅滋事","走私","毒品"],
+        ["一审","二审","再审","调解",'仲裁'],
+        ["有限公司", "合同纠纷", "财产","违约","资产"],
+        ["著作权","名誉","肖像","影视作品","传播"],
+        ["借贷","股票","报酬","工资",'信用卡',"租赁"]
+    ]
+    random.shuffle(COMMON_WORDS)
+    for words in COMMON_WORDS:
+        count = 0
+        for word in words:
+            if content.find(word) != -1:
+                result_list.append(word)
+                count += 1
+            if count >= 2:
+                break
+        if len(result_list) >= max_num:
+            break
+
+    print("result_list", " ".join(result_list))
+    return " ".join(result_list)
+    # # print("get_keywords", content)
+    # for re_pattern in RE_PATTERNS:
+    #     match = re.match(re_pattern, content)
+    #     print("re", re_pattern, match)
+    #     if match:
+    #         print("re_group", re_pattern, match)
+    #         result_list.append(match.group())
+
+
+
+def search_upload_xml():
+    # Load the XML file
+    try:
+        tree = ET.parse(settings.UPLOAD_PATH)
+        root = tree.getroot()
+        print("root")
+    except:
+        with open(settings.UPLOAD_PATH, encoding='utf-8') as f:
+            contents = f.readlines()
+        content_str = ' '.join([i.strip() for i in contents])
+        search_dict = dict()
+        new_query = get_keywords_from_text(content_str)
+        search_dict['q'] = new_query
+        return search_cases_new(search_dict)
+    
+    # Extract the case_reason
+    search_dict = dict()
+    case_reason = None
+    try:
+        case_reason = root.find('.//AY').get('value'); assert len(case_reason) > 1
+    except:
+        try:
+            case_reason = root.find(".//QSAY").get('value'); assert len(case_reason) > 1
+        except:
+            try:
+                case_reason = root.find(".//QSZAY").get('value'); assert len(case_reason) > 1
+            except:
+                case_reason = None
+    if case_reason:
+        search_dict['case_reason'] = case_reason
+
+    try:
+        note_name= root.find('.//WSMC').get('value')
+    except:
+        note_name = None
+    if note_name:
+        search_dict['note_name'] = note_name
+
+    if len(search_dict) <= 2:
+        try: 
+            text=root.find(".//QW").get("value")[:300]
+            query = get_keywords_from_text(text, max_num=4)
+            search_dict['q'] = query
+        except:
+            pass
+
+
+    return search_cases_new(search_dict)
+    
+#     return JsonResponse({"status": "success", "case_reason": case_reason})
+# else:
+#     return JsonResponse({"status": "error"})
 
 def search_view(request: HttpRequest):
     t1 = time.time()
@@ -211,15 +315,21 @@ def search_view(request: HttpRequest):
             }
         }
 
-    if 'lid' in cd and cd['lid'].isnumeric():
+    print("upload", cd.get('upload', ''))
+    if cd.get('upload', '') == '1':
+        results, split_words = search_upload_xml()
+        query_str = '#' # split_words[0] if len(split_words) > 0 else "#"
+
+    elif 'lid' in cd and cd['lid'].isnumeric():
         print("lid", cd['lid'])
         return related_cases_from_law(request)
     
-    query_str = cd['q']  # The 'q' parameter in the URL contains the query string
-    print("query_str1", query_str)
-    # MAX_NUM = 500
-    # results, split_words = search_cases(query_str) # [:MAX_NUM]
-    results, split_words = search_cases_new(cd)
+    else:
+        query_str = cd['q']  # The 'q' parameter in the URL contains the query string
+        print("query_str1", query_str)
+        # MAX_NUM = 500
+        # results, split_words = search_cases(query_str) # [:MAX_NUM]
+        results, split_words = search_cases_new(cd)
 
     total_results = len(results)
     print("total_num", total_results)

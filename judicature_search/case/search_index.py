@@ -57,9 +57,9 @@ def search_cases_new(cd: dict):
         #     if get_valid_value(k):
         #         print(k, cd[k])
         # print([get_valid_value(k) for k in cd.keys() if k != "page"]))
-        # if sum([get_valid_value(k) for k in cd.keys() if k != "page"]) == 1:
-        #     print("use old search_case")
-        #     return search_cases(query_str)
+        if sum([get_valid_value(k) for k in cd.keys() if k != "page"]) == 1:
+            print("use old search_case")
+            return search_cases(query_str)
 
         index_path = 'whoosh_index'
         index = open_dir(index_path)
@@ -75,27 +75,30 @@ def search_cases_new(cd: dict):
                 split_words = [i.text for i in query]
             except:
                 split_words = []
-        results = SearchQuerySet().models(Case).filter(qw_value = cd['q'])
+        results = SearchQuerySet().models(Case).filter(qw_value = cd['q']).load_all()
+        print("only q", len(results))
     else:
         results = Case.objects.all()
         
 
     if get_valid_value('note_name'):
         results = results.filter(note_name = cd['note_name'])
-        split_words.append(cd['note_name'])
+        # split_words.append(cd['note_name'])
     if get_valid_value('judge_prop'):
         results = results.filter(judge_prop = cd['judge_prop'])
-        split_words.append(cd['judge_prop'])
+        # split_words.append(cd['judge_prop'])
     if get_valid_value('case_reason'):
         results = results.filter(case_reason = cd['case_reason'])
-        split_words.append(cd['case_reason'])
-    if get_valid_value('province'):
-        results = results.filter(province = cd['province'])
-        split_words.append(cd['province'])
+        # split_words.append(cd['case_reason'])
+    if get_valid_value('court'):
+        results = results.filter(court = cd['court'])
+        # split_words.append(cd['court'])
     if get_valid_value('year'):
         year = int(cd['year'])
         results = results.filter(year = year)
-        split_words.append(cd['year'])
+        # split_words.append(cd['year'])
+
+    print([get_valid_value(i) for i in ['note_name', 'case_reason', 'court', 'year', 'judgeprop']])
 
     if get_valid_value("q"):
         results = results.load_all()

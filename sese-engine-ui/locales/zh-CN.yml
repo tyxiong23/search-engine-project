@@ -6,6 +6,8 @@ button:
   toggle_dark: 切换深色模式
   toggle_langs: 切换语言
   search: 搜索
+  advance_search: 高级检索
+  similar_case: 类案检索
 
 intro:
   desc: 固执己见的 Vite 项目模板

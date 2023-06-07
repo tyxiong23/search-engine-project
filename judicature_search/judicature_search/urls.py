@@ -22,5 +22,6 @@ urlpatterns = [
     # path('case/', include('case.urls')),  # Include URLs from the case app
     path('search/', views.search_view, name="search"),
     path("detail/", views.case_detail_view, name="case"),
-    path("law2cases/", views.related_cases_from_law, name="law2cases")
+    path("law2cases/", views.related_cases_from_law, name="law2cases"),
+    path("upload/", views.upload_case_xml, name="upload_case_xml")
 ]

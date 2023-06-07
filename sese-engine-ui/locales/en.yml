@@ -6,6 +6,8 @@ button:
   toggle_dark: Toggle dark mode
   toggle_langs: Change languages
   search: Search
+  advance_search: Advanced Search
+  similar_case: Similar Cases
 
 intro:
   desc: Opinionated Vite Starter Template

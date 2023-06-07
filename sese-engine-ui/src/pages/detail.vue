@@ -1,19 +1,10 @@
 <script setup lang="ts">
-import { useEnter } from '~/composables/search'
 import { useDetailStore} from '~/stores/detail'
-
 import { detail } from "~/api/detail"
-
 import { useRouter} from "vue-router"
-
-import {
-  Search,
-} from '@element-plus/icons-vue'
-
 import { bannerUrl } from '~/config'
 import { CaseDetail } from '~/api/types/detail'
 
-const { enter } = useEnter()
 const detailStore = useDetailStore()
 
 
@@ -71,7 +62,7 @@ const { t } = useI18n()
 
 <template>
 
-  <div p="2" h="screen">
+  <div p="2">
     <Transition>
       <Loading v-if="detailStore.isLoading" />
     </Transition>
@@ -84,23 +75,23 @@ const { t } = useI18n()
           class="sese-btn m-3 text-sm btn "
           bg="gradient-to-r"
           @click="BackToSearch()"
-          style="float: left; margin-left: 60px;"
+          style="float: left; margin-left: 30px;"
         >
         {{ t('button.back') }}
         </button>
     </div>
     
-    <div class="flex flex-col" h="full" style="flex-direction: row;">
+    <div class="flex flex-col" h="full" style="flex-direction: row; margin-bottom: 20px;">
       
-      <div m="l-6 r-8 t-3" style="width:60%">
+      <div m="l-6 r-8 t-3" style="width:60%;">
         
       
-      <div v-if="detailData" style="text-align: left; background-color: #dddddd; padding: 5px;">
+      <div v-if="detailData" style="text-align: left; padding: 5px; font-family: 黑体; border-width: 3px; border-color: #AABBCC; ">
         <div style="text-align:center">
-        <h2 style="font-size:larger">{{ detailData.head }}</h2>
+        <h2 style="font-size:x-large; font-weight: bolder;">{{ detailData.head }}</h2>
         </div>
         <div class="flex flex-row" style=" justify-content: center; align-content: center;">
-          <div style="width:50%; background-color: #EEDDFF; float:center; margin: 10px;">
+          <div style="background-color: #CCEEFF; float:center; margin: 20px; font-family: 楷体; padding: 10px; border-radius: 5px; margin-bottom: 0;">
             <p> <b>年份：</b>{{ detailData.year }}</p>
             <p> <b>经办法院：</b>{{ detailData.court }}</p>
             <p> <b>审判程序：</b>{{ detailData.judge_prop }}</p>
@@ -109,21 +100,28 @@ const { t } = useI18n()
           </div>
          
         </div>
-        <p class="case-content"> <b>当事人：</b>{{ detailData.related_people }}</p>
+        <div style="font-size: 15px; padding-left: 10px; padding-right: 10px; margin-top: 25px;">
+          <!-- <el-divider/> -->
+        <p class="case-content" style="margin-bottom: 5px;"> <b>当事人：</b>{{ detailData.related_people }}</p>
         <p class="case-content"> <b>诉讼记录：</b>{{ detailData.judicial_record}}</p>
-        <p class="case-content"> <b>案件基本情况：</b>{{ detailData.basic_info }}</p>
+        <el-divider border-style="dotted"/>
+        <p class="case-content" style="margin-bottom: 5px;"> <b>案件基本情况：</b>{{ detailData.basic_info }}</p>
         <p class="case-content"> <b>判决分析过程：</b>{{ detailData.judgement_process }}</p>
-        <p class="case-content"> <b>判决结果：</b>{{ detailData.result}}</p>
-        <p style="text-align: center;"> {{ detailData.tail }}</p>
+        <el-divider border-style="dotted"/>
+        <p class="case-content" style="margin-bottom: 25px;"> <b>判决结果：</b>{{ detailData.result}}</p>
+        <!-- <el-divider/> -->
+        <p style="text-align: center; margin: 10px; font-size: 16px;"> {{ detailData.tail }}</p>
+        </div>
       </div>
 
         
       </div>
-      <div style="width: 40%; height: 85%;" overflow-y="auto">
-      <div v-if="detailData" style="margin-top: 10px;">
-        <p style="margin: 8px; font-size: large;">相关法律条文</p>
+      <div style="width: 40%; height: 85%;  margin-right: 15px;" >
+      <div v-if="detailData" style="margin-top: 20px;">
+        <p style="margin: 8px; font-size: larger; font-weight: bold;">相关法律条文</p>
           <template v-for="(item_law) in detailData.laws" sm>
             <el-tag
+              class='icon'
               :type="''"
               effect="dark" round
               style="margin:5px" @click="searchFromLaw(item_law.id.toString())">
@@ -131,8 +129,12 @@ const { t } = useI18n()
             </el-tag>
           </template>
       </div>
-      <div style="margin-top: 25px;">
-          <p style="margin: 8px; font-size: large;">案例推荐</p>
+      <div style="margin-right: 10px; margin-left: 10px; margin-top: 20px;">
+      <el-divider />
+     </div>
+      <div style="padding: 5px;">
+        
+          <p style="margin-bottom: 12px; font-size: larger; font-weight: bold;">案例推荐</p>
           <template v-if="detailData">
             <ResultItem v-for="(item, i) in detailData.related_cases" :key="i" :keywords="[]" se :result="item"/>
           </template>
@@ -152,8 +154,9 @@ const { t } = useI18n()
         </button> -->
         
       <!-- </div> -->
+      <!-- <Footer/> -->
     </div>
-    <!-- <Footer/> -->
+    
   </div>
 </template>
 
@@ -165,5 +168,19 @@ meta:
 <style lang="scss">
 .case-content {
   margin: 6px;
+}
+
+.icon {
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+
+
+.el-divider--horizontal {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-color: #7a7979;
 }
 </style>

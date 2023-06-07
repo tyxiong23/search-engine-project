@@ -8,7 +8,8 @@ interface SearchParams {
   note_name: string
   judge_prop: string
   case_reason: string
-  province: string
+  court: string
+  upload: string
 }
 
 export async function search(params: Partial<SearchParams>) {
@@ -23,7 +24,8 @@ export async function search(params: Partial<SearchParams>) {
     note_name: string
     judge_prop: string
     case_reason: string
-    province: string
+    court: string
+    upload: string
   } = {
     q: params.q || '',
     page: params.page || '1',
@@ -32,13 +34,14 @@ export async function search(params: Partial<SearchParams>) {
     note_name: params.note_name || '',
     judge_prop: params.judge_prop || '',
     case_reason: params.case_reason || '',
-    province: params.province || '',    
+    court: params.court || '',  
+    upload: params.upload || '',  
   }
   const data = await apiFetch('/search', {
     params: searchParams,
   }).catch((e) => {
     console.error(e)
-    toast.error('坏了！服务器坏了！快去打莉沫酱！')
+    toast.error('服务器出现故障！！/search/')
   })
   return data
 }
