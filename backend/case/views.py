@@ -219,9 +219,9 @@ def get_keywords_from_text(content: str, max_num = 4):
     COMMON_WORDS = [
         ["交通肇事","故意伤害","强奸","非法拘禁","抢劫","盗窃","诈骗","抢夺","职务侵占","敲诈勒索","妨害公务","聚众斗殴","寻衅滋事","走私","毒品","故意杀人","伤害"],
         ["一审","二审","再审","调解",'仲裁'],
-        ["有限公司", "合同纠纷", "财产","违约","资产"],
-        ["著作权","名誉","肖像","影视作品","传播"],
-        ["借贷","股票","报酬","工资",'信用卡',"租赁"],
+        ["有限公司", "合同纠纷", "财产","违约","合同"],
+        ["著作权","名誉","肖像","影视作品","传播","微信","版权"],
+        ["借贷","股票","报酬","工资",'信用卡',"租赁","资产","劳动"],
         ["无期徒刑", "死刑"]
     ]
     random.shuffle(COMMON_WORDS)
@@ -307,6 +307,7 @@ def search_view(request: HttpRequest):
     t1 = time.time()
 
     form = SearchForm(request.GET)
+    
     try:
         cd = form.data
         
@@ -317,6 +318,8 @@ def search_view(request: HttpRequest):
                 "msg": "view.search_view error!!"
             }
         }
+
+    print("form.time", time.time() - t1)
 
     print("upload", cd.get('upload', ''))
     if cd.get('upload', '') == '1':
@@ -332,24 +335,31 @@ def search_view(request: HttpRequest):
         print("query_str1", query_str)
         # MAX_NUM = 500
         # results, split_words = search_cases(query_str) # [:MAX_NUM]
+        # print("before search case", time.time() - t1)
         results, split_words = search_cases_new(cd)
 
-    total_results = len(results)
-    print("total_num", total_results)
-    # results = list(results)
-    # random.shuffle(results)
-    tt = time.time()
+    taa = time.time()
+    
+    if isinstance(results, list):
+        total_results = len(results)
+    else:
+        total_results = results.count()
+    ta = time.time()
     results = results[:MAX_NUM]
+    tb = time.time()
     paginator = Paginator(results, per_page=10)
+    
     page = request.GET.get("page", default='1')
     page_obj_list = paginator.get_page(page).object_list
-    print("paginator_time", time.time() - tt)
+    tc = time.time()
 
     result_list = []
-    for obj in page_obj_list:
+    for (i, obj) in enumerate(page_obj_list):
         # print("type", type(obj), obj.keys())
         result_obj = get_obj_summary(obj, query_str)
         result_list.append(result_obj)
+    td = time.time()
+    print("paginator_time", td - tc, tc - tb, tb - ta, ta - taa, taa - t1)
 
     time_delta = time.time() - t1
     response_data = {

@@ -139,6 +139,7 @@ HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'case.whoosh_backend_ZW.WhooshEngine',
         'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+        'INCLUDE_SPELLING': False,
     },
 }
 

@@ -6,9 +6,12 @@ from case.models import Case
 from whoosh.index import open_dir
 import whoosh.query.terms
 
+import time
+
 MAX_NUM = 100
 
 def search_cases(query_str):
+    t1 = time.time()
     index_path = 'whoosh_index'
     index = open_dir(index_path)
 
@@ -36,6 +39,8 @@ def search_cases(query_str):
             results_list.append(dict(hit))  # Convert the hit object to a dictionary and add it to the list
             # print("dict", hit.keys())
 
+    t2 = time.time()
+    print("search_case", t2 - t1)
     return results_list, split_words
 
 
@@ -50,6 +55,7 @@ def search_cases_new(cd: dict):
     
     split_words = []
     
+    t1 = time.time()
     if get_valid_value("q"):
         query_str = cd['q']
         print("query q", query_str)
@@ -75,12 +81,15 @@ def search_cases_new(cd: dict):
                 split_words = [i.text for i in query]
             except:
                 split_words = []
+        print("before search", time.time() - t1)
         results = SearchQuerySet().models(Case).filter(qw_value = cd['q']).load_all()
-        print("only q", len(results))
+        # print("only q", len(results))
     else:
+        # results = SearchQuerySet().models(Case).all()
         results = Case.objects.all()
         
 
+    t2 = time.time()
     if get_valid_value('note_name'):
         results = results.filter(note_name = cd['note_name'])
         # split_words.append(cd['note_name'])
@@ -100,10 +109,13 @@ def search_cases_new(cd: dict):
 
     print([get_valid_value(i) for i in ['note_name', 'case_reason', 'court', 'year', 'judgeprop']])
 
-    if get_valid_value("q"):
-        results = results.load_all()
+    # if get_valid_value("q"):
+    results = results.all()
 
     print("split_words", split_words)
+    t3 = time.time()
+    print("search_time_new", t3 - t1, t3 - t2, t2-t1)
+    print('count')
     return results, split_words
     
     
