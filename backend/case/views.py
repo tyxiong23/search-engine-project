@@ -179,10 +179,10 @@ def related_cases_from_law(request: HttpRequest):
         law_id = int(law_id)
         law: Law = Law.objects.get(id = law_id)
         results = law.cases.all()
+        total_results = len(results)
         # random.shuffle(results)
         results = results[:MAX_NUM]
-        split_words = [law.name]
-        total_results = len(results)
+        split_words = [law.name]       
         # print("total_num", total_results)
         paginator = Paginator(results, per_page=10)
         page = request.GET.get("page", default='1')
@@ -217,11 +217,12 @@ def related_cases_from_law(request: HttpRequest):
 def get_keywords_from_text(content: str, max_num = 4):
     result_list = []
     COMMON_WORDS = [
-        ["交通肇事","故意伤害","强奸","非法拘禁","抢劫","盗窃","诈骗","抢夺","职务侵占","敲诈勒索","妨害公务","聚众斗殴","寻衅滋事","走私","毒品"],
+        ["交通肇事","故意伤害","强奸","非法拘禁","抢劫","盗窃","诈骗","抢夺","职务侵占","敲诈勒索","妨害公务","聚众斗殴","寻衅滋事","走私","毒品","故意杀人","伤害"],
         ["一审","二审","再审","调解",'仲裁'],
         ["有限公司", "合同纠纷", "财产","违约","资产"],
         ["著作权","名誉","肖像","影视作品","传播"],
-        ["借贷","股票","报酬","工资",'信用卡',"租赁"]
+        ["借贷","股票","报酬","工资",'信用卡',"租赁"],
+        ["无期徒刑", "死刑"]
     ]
     random.shuffle(COMMON_WORDS)
     for words in COMMON_WORDS:
@@ -258,7 +259,8 @@ def search_upload_xml():
             contents = f.readlines()
         content_str = ' '.join([i.strip() for i in contents])
         search_dict = dict()
-        new_query = get_keywords_from_text(content_str)
+        new_query = get_keywords_from_text(content_str, max_num=5)
+        print("upload search_str", content_str)
         search_dict['q'] = new_query
         return search_cases_new(search_dict)
     
@@ -334,9 +336,14 @@ def search_view(request: HttpRequest):
 
     total_results = len(results)
     print("total_num", total_results)
+    # results = list(results)
+    # random.shuffle(results)
+    tt = time.time()
+    results = results[:MAX_NUM]
     paginator = Paginator(results, per_page=10)
     page = request.GET.get("page", default='1')
     page_obj_list = paginator.get_page(page).object_list
+    print("paginator_time", time.time() - tt)
 
     result_list = []
     for obj in page_obj_list:

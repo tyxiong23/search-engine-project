@@ -6,7 +6,7 @@ from case.models import Case
 from whoosh.index import open_dir
 import whoosh.query.terms
 
-MAX_NUM = 300
+MAX_NUM = 100
 
 def search_cases(query_str):
     index_path = 'whoosh_index'
@@ -36,7 +36,7 @@ def search_cases(query_str):
             results_list.append(dict(hit))  # Convert the hit object to a dictionary and add it to the list
             # print("dict", hit.keys())
 
-    return results_list[:MAX_NUM], split_words
+    return results_list, split_words
 
 
 from haystack.forms import SearchForm, SearchQuerySet
@@ -104,7 +104,7 @@ def search_cases_new(cd: dict):
         results = results.load_all()
 
     print("split_words", split_words)
-    return results[:MAX_NUM], split_words
+    return results, split_words
     
     
 

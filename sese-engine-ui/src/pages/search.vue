@@ -155,6 +155,7 @@ const resetSearchField = () => {
   ref_court.value = ''
   ref_law_id.value = ''
   ref_upload.value = ''
+  curPage.value = 1
 }
 
 const AdvanceSearch = () => {
